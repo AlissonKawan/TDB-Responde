@@ -1,12 +1,17 @@
+import Section from '../components/layout/Section';
+import PageShell from '../components/layout/PageShell';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageHeader from '../components/ui/PageHeader';
+import TeamMemberCard from '../components/ui/TeamMemberCard';
 
-import Button from "../components/ui/Button";
 interface Member {
   name: string;
-  rm: string;
-  course: string;
-  image: string;
-  github: string;
-  linkedin: string;
+  rm?: string;
+  course?: string;
+  image?: string;
+  github?: string;
+  linkedin?: string;
 }
 
 function Integrantes() {
@@ -15,9 +20,9 @@ function Integrantes() {
       name: 'Alisson Kawan',
       rm: '567598',
       course: '1TDSPS',
-      image: '/public/img/alisson.jpeg',
+      image: '/img/alisson.jpeg',
       github: 'https://github.com/AlissonKawan',
-      linkedin: 'https://www.linkedin.com/in/alisson-kawan-evangelista-silva-5a3355219/'
+      linkedin: 'https://www.linkedin.com/in/alisson-kawan-evangelista-silva-5a3355219/',
     },
     {
       name: 'Marcos Vinicius',
@@ -25,59 +30,43 @@ function Integrantes() {
       course: '1TDSPS',
       image: '/img/marcos.jpeg',
       github: 'https://github.com/marcos-thebest',
-      linkedin: 'https://www.linkedin.com/in/marcos-vinicius-de-jesus-almeida/'
-    }
+      linkedin: 'https://www.linkedin.com/in/marcos-vinicius-de-jesus-almeida/',
+    },
+    {
+      name: 'Eduardo Boni',
+      course: '1TDSPS',
+    },
   ];
 
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-blue-50 py-12 text-center">
-        <h2 className="text-5xl font-bold text-gray-800">Nossa Equipe</h2>
-        <p className="text-gray-600 mt-2 text-2xl">Conheça os criadores do <span className="text-blue-600">TDB Responde</span></p>
-      </section>
+    <PageShell>
+      <PageHeader
+        eyebrow="Equipe"
+        title="Integrantes do projeto"
+        description="Pessoas responsaveis pela criacao, evolucao e apresentacao do TDB Responde."
+      />
 
-      {/* Cards */}
-      <section className="py-12 max-w-4xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {members.map((m) => (
-            <div key={m.rm} className="bg-white rounded-lg shadow-md p-6 text-center border border-gray-100">
-              
-              {/* Foto */}
-              <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 transition-transform duration-300 hover:scale-125">
-                <img src={m.image} alt={m.name} className="w-full h-full object-cover" />
-              </div>
-
-              {/* Info */}
-              <h3 className="text-xl font-bold text-gray-800 transition-transform duration-300 hover:scale-125">{m.name}</h3>
-              <p className="text-blue-600 font-medium transition-transform duration-300 hover:scale-125">RM: {m.rm}</p>
-              <p className="text-gray-500 text-sm mb-4 transition-transform duration-300 hover:scale-125">{m.course}</p>
-
-              {/* Links */}
-              <div className="flex gap-4 justify-center">
-                <a href={m.github} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-600 font-medium transition-transform duration-300 hover:scale-125">
-                  GitHub
-                </a>
-                <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-600 font-medium transition-transform duration-300 hover:scale-125">
-                  LinkedIn
-                </a>
-              </div>
-
-            </div>
+      <Section tone="white">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {members.map((member) => (
+            <TeamMemberCard key={member.name} {...member} />
           ))}
         </div>
+      </Section>
 
-        {/* CTA */}
-        <div className="mt-12 text-center bg-blue-50 p-8 rounded-lg">
-          <h3 className="text-xl font-bold text-gray-800 mb-2">Vamos conversar?</h3>
-          <p className="text-gray-600 mb-4">Entre em contato conosco</p>
-         <Button href="/contato" variant="primary" size="large">
-              Fale Conosco!
-            </Button>
-        </div>
-      </section>
-    </div>
+      <Section tone="blue">
+        <Card className="flex flex-col gap-6 p-8 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#2563EB]">Contato</p>
+            <h2 className="mt-2 text-3xl font-bold text-[#0F172A]">Vamos conversar?</h2>
+            <p className="mt-2 text-[#475569]">Entre em contato com a equipe do projeto.</p>
+          </div>
+          <Button href="/contato" size="large">Fale conosco</Button>
+        </Card>
+      </Section>
+    </PageShell>
   );
 }
 
-  export default Integrantes;
+export default Integrantes;
+

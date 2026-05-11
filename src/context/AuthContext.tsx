@@ -8,6 +8,12 @@ import type { AuthUser } from '../types/index';
 import { AuthContext } from './authContextInstance';
 import { loadTDBState } from './tdbStorage';
 
+const TEST_VOLUNTEERS = [
+  { id: 1, nome: 'Ana Souza', usuario: 'ana.souza', senha: '123456', especialidade: 'Odontologia', acessoSigilo: true },
+  { id: 2, nome: 'Carlos Lima', usuario: 'carlos.lima', senha: '123456', especialidade: 'Assistencia Social', acessoSigilo: false },
+  { id: 3, nome: 'Beatriz Nunes', usuario: 'beatriz.nunes', senha: '123456', especialidade: 'Psicologia', acessoSigilo: true },
+];
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
     try {
@@ -39,6 +45,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         tipo: 'voluntario',
         acessoSigilo: voluntario.acessoSigilo,
         especialidade: voluntario.especialidade,
+      });
+      return 'voluntario';
+    }
+
+    const voluntarioTeste = TEST_VOLUNTEERS.find(
+      v => v.usuario === usuario.trim() && v.senha === senha.trim()
+    );
+
+    if (voluntarioTeste) {
+      setUser({
+        id: voluntarioTeste.id,
+        nome: voluntarioTeste.nome,
+        tipo: 'voluntario',
+        acessoSigilo: voluntarioTeste.acessoSigilo,
+        especialidade: voluntarioTeste.especialidade,
       });
       return 'voluntario';
     }

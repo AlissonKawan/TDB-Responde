@@ -1,13 +1,14 @@
-import { apiGet, apiRequest } from './api';
+import { apiClient } from './apiClient';
 import type { VoluntarioApi, VoluntarioRequestApi } from '../types/api';
 
-export function getVoluntarios(): Promise<VoluntarioApi[]> {
-  return apiGet<VoluntarioApi[]>('/voluntarios');
-}
+export const voluntariosService = {
+  listar: () => apiClient.get<VoluntarioApi[]>('/voluntarios'),
+  buscarPorId: (id: number) => apiClient.get<VoluntarioApi>(`/voluntarios/${id}`),
+  criar: (payload: VoluntarioRequestApi) => apiClient.post<VoluntarioApi>('/voluntarios', payload),
+  atualizar: (id: number, payload: VoluntarioRequestApi) =>
+    apiClient.put<VoluntarioApi>(`/voluntarios/${id}`, payload),
+  excluir: (id: number) => apiClient.delete<void>(`/voluntarios/${id}`),
+};
 
-export function createVoluntario(payload: VoluntarioRequestApi): Promise<VoluntarioApi> {
-  return apiRequest<VoluntarioApi>('/voluntarios', {
-    method: 'POST',
-    body: payload,
-  });
-}
+export const getVoluntarios = voluntariosService.listar;
+export const createVoluntario = voluntariosService.criar;

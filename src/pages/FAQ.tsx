@@ -1,5 +1,9 @@
-import { useState } from "react";
-import Button from "../components/ui/Button";
+import { useState } from 'react';
+import Section from '../components/layout/Section';
+import PageShell from '../components/layout/PageShell';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageHeader from '../components/ui/PageHeader';
 
 interface FAQItem {
   question: string;
@@ -7,128 +11,79 @@ interface FAQItem {
 }
 
 function FAQ() {
-    //openIndex Variável que guarda QUAL pergunta está aberta
-    //setOpenIndex	Função para MUDAR essa variável
-    //useState	Hook do React que cria "memória" no componente
-    //<number | null>	Tipo: pode ser número (0, 1, 2...) ou null (nenhuma)
-    //null	Valor inicial: nenhuma pergunta aberta
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
   const faqs: FAQItem[] = [
     {
-      question: "O que é o TDB Responde?",
-      answer:
-        "É uma plataforma de atendimento centralizado desenvolvida para a ONG Turma do Bem, que unifica WhatsApp, e-mail e redes sociais em um único sistema.",
+      question: 'O que e o TDB Responde?',
+      answer: 'E uma plataforma de atendimento centralizado para a Turma do Bem, reunindo canais, historico e prioridades em um unico fluxo.',
     },
     {
-      question: "Quem pode usar o TDB Responde?",
-      answer:
-        "Foi desenvolvido especificamente para atender às necessidades da equipe de voluntários e beneficiários da Turma do Bem.",
+      question: 'Quem pode usar a plataforma?',
+      answer: 'A solucao foi pensada para voluntarios, equipe administrativa e beneficiarios acompanharem atendimentos com mais clareza.',
     },
     {
-      question: "É gratuito?",
-      answer:
-        "Sim! É um projeto acadêmico desenvolvido como Challenge sem fins lucrativos.",
+      question: 'O projeto e gratuito?',
+      answer: 'Sim. Este MVP foi desenvolvido como projeto academico da FIAP em parceria com a proposta social da Turma do Bem.',
     },
     {
-      question: "Qual a localização da ONG?",
-      answer:
-        " Rua Maurício Francisco Klabin 449 Vila Mariana, São Paulo-SP, 04120-020 Fone 55 11 50847276",
+      question: 'Os dados dos assistidos sao protegidos?',
+      answer: 'O fluxo considera sigilo, codinomes e acesso restrito para casos sensiveis, especialmente no contexto do Programa Apolonia.',
     },
     {
-      question: "Os dados dos assistidos são protegidos?",
-      answer:
-        "Sim, seguimos diretrizes de proteção de dados e apenas voluntários autorizados têm acesso às informações.",
+      question: 'Preciso fazer login?',
+      answer: 'Sim. Voluntarios acessam o painel administrativo e beneficiarios acompanham seus atendimentos por um portal protegido.',
     },
     {
-      question: "Preciso fazer login para usar?",
-      answer:
-        "Sim, cada voluntário tem seu próprio login e senha para garantir a segurança das informações.",
+      question: 'Como me tornar voluntario?',
+      answer: 'Use a pagina Seja voluntario para registrar interesse. A equipe pode analisar a solicitacao no painel.',
     },
     {
-      question: "Como faço para me tornar voluntário?",
-      answer:
-        "Entre em contato com a Turma do Bem pelo site oficial ou pelas redes sociais para saber como participar.",
-    },
-    {
-      question: "Encontrei um erro, o que faço?",
-      answer:
-        "Entre em contato conosco pela página de contato ou envie um e-mail para reportar o problema.",
-    },
-    {
-      question: "O sistema já está funcionando?",
-      answer:
-        "Atualmente é um MVP (Produto Mínimo Viável) em fase de desenvolvimento e testes.",
-    },
-    {
-      question: "Quem desenvolveu o TDB Responde?",
-      answer:
-        "O projeto foi desenvolvido por Alisson Kawan e Marcos Vinicius, alunos do curso de Análise e Desenvolvimento de Sistemas da FIAP.",
-    },
-    {
-      question: "Posso usar o TDB Responde na minha ONG?",
-      answer:
-        "O sistema foi desenvolvido especificamente para a Turma do Bem, mas entre em contato para conversarmos sobre adaptações.",
+      question: 'Quem desenvolveu o projeto?',
+      answer: 'O projeto foi desenvolvido por Alisson Kawan, Marcos Vinicius e Eduardo Boni.',
     },
   ];
 
-  const toggle = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-blue-50 py-12 text-center">
-        <h2 className="text-5xl font-bold text-gray-800">
-          Perguntas Frequentes
-        </h2>
-        <p className="text-gray-600 mt-2 text-2xl">
-          Tire suas dúvidas sobre o <span className="text-blue-600">TDB Responde</span>
-        </p>
-      </section>
+    <PageShell>
+      <PageHeader
+        eyebrow="FAQ"
+        title="Perguntas frequentes"
+        description="Respostas rapidas sobre funcionamento, acesso, seguranca e proposta do TDB Responde."
+        align="center"
+      />
 
-      {/* Lista de FAQs */}
-      <section className="py-12 max-w-3xl mx-auto px-4 space-y-4">
-        {faqs.map((faq, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden"
-          >
-            {/* Pergunta (clicável) */}
-            <button
-              onClick={() => toggle(index)}
-              className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-semibold text-gray-800">
-                {faq.question}
-              </span>
-              <span
-                className={`text-2xl transition-transform ${openIndex === index ? "rotate-45" : ""}`}
+      <Section tone="white">
+        <div className="mx-auto max-w-4xl space-y-4">
+          {faqs.map((faq, index) => (
+            <Card key={faq.question} className="overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition hover:bg-blue-50/50"
               >
-                +
-              </span>
-            </button>
+                <span className="text-base font-bold text-[#0F172A]">{faq.question}</span>
+                <span className={`text-2xl font-light text-[#2563EB] transition-transform ${openIndex === index ? 'rotate-45' : ''}`}>+</span>
+              </button>
+              {openIndex === index && (
+                <div className="border-t border-[#E2E8F0] px-6 py-5 text-[#475569]">
+                  {faq.answer}
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      </Section>
 
-            {/* Resposta (aparece quando clicado) */}
-            {openIndex === index && (
-              <div className="px-6 pb-4 text-gray-600 border-t border-gray-100 pt-4">
-                {faq.answer}
-              </div>
-            )}
-          </div>
-        ))}
-      </section>
-
-      {/* CTA */}
-      <section className="pb-12 text-center">
-        <p className="text-gray-600 mb-4">Ainda tem dúvidas?</p>
-            <Button href="/contato" variant="primary" size="large">
-              Entre em contato
-            </Button>
-      </section>
-    </div>
+      <Section tone="blue" className="border-t border-[#E2E8F0]">
+        <div className="text-center">
+          <p className="mb-4 text-[#475569]">Ainda tem duvidas?</p>
+          <Button href="/contato" size="large">Entre em contato</Button>
+        </div>
+      </Section>
+    </PageShell>
   );
 }
 
-  export default FAQ;
+export default FAQ;
+

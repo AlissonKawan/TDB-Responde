@@ -1,7 +1,12 @@
-// src/pages/Login.tsx
 import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import Section from '../components/layout/Section';
+import PageShell from '../components/layout/PageShell';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import { Field, Input } from '../components/ui/Input';
+import PageHeader from '../components/ui/PageHeader';
 import { useAuth } from '../context/useAuth';
 
 interface FormData {
@@ -14,7 +19,6 @@ function Login() {
   const navigate = useNavigate();
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
-
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
 
   if (user) {
@@ -24,12 +28,12 @@ function Login() {
   const onSubmit = (data: FormData) => {
     setErro('');
     setLoading(true);
-    setTimeout(() => {
+    window.setTimeout(() => {
       const resultado = login(data.usuario, data.senha);
       setLoading(false);
       if (resultado === 'voluntario') navigate('/admin');
       else if (resultado === 'beneficiario') navigate('/portal');
-      else setErro('Usuário ou senha inválidos. Tente novamente.');
+      else setErro('Usuario ou senha invalidos. Tente novamente.');
     }, 600);
   };
 
@@ -39,148 +43,103 @@ function Login() {
   };
 
   const voluntarios = [
-    { usuario: 'ana.souza',     senha: '123456', nome: 'Ana Souza',     area: 'Odontologia',        sigilo: true  },
-    { usuario: 'carlos.lima',   senha: '123456', nome: 'Carlos Lima',   area: 'Assistência Social', sigilo: false },
-    { usuario: 'beatriz.nunes', senha: '123456', nome: 'Beatriz Nunes', area: 'Psicologia',         sigilo: true  },
+    { usuario: 'ana.souza', senha: '123456', nome: 'Ana Souza', area: 'Odontologia', sigilo: true },
+    { usuario: 'carlos.lima', senha: '123456', nome: 'Carlos Lima', area: 'Assistencia Social', sigilo: false },
+    { usuario: 'beatriz.nunes', senha: '123456', nome: 'Beatriz Nunes', area: 'Psicologia', sigilo: true },
   ];
 
   const beneficiarios = [
-    { usuario: 'CA-2024-001', senha: '1234', nome: 'Código CA-2024-001', desc: 'Criança · 12 anos · EMEF Liberdade'    },
-    { usuario: 'CA-2024-002', senha: '1234', nome: 'Código CA-2024-002', desc: 'Criança · 9 anos · EMEF Jardins'       },
-    { usuario: 'VIOLETA-07',  senha: '1234', nome: 'VIOLETA-07',         desc: 'Mulher Apolônia · Risco alto'           },
-    { usuario: 'ROSA-14',     senha: '1234', nome: 'ROSA-14',            desc: 'Mulher Apolônia · Risco médio'          },
+    { usuario: 'CA-2024-001', senha: '1234', nome: 'Codigo CA-2024-001', desc: 'Crianca | 12 anos | EMEF Liberdade' },
+    { usuario: 'CA-2024-002', senha: '1234', nome: 'Codigo CA-2024-002', desc: 'Crianca | 9 anos | EMEF Jardins' },
+    { usuario: 'VIOLETA-07', senha: '1234', nome: 'VIOLETA-07', desc: 'Mulher Apolonia | Risco alto' },
+    { usuario: 'ROSA-14', senha: '1234', nome: 'ROSA-14', desc: 'Mulher Apolonia | Risco medio' },
   ];
 
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-blue-50 py-12 text-center">
-        <h2 className="text-5xl font-bold text-gray-800">Acesso ao Sistema</h2>
-        <p className="text-gray-600 mt-2 text-xl">
-          Entre com suas credenciais para acessar o{' '}
-          <span className="text-blue-600 font-semibold">TDB Responde</span>
-        </p>
-      </section>
+    <PageShell>
+      <PageHeader
+        eyebrow="Acesso"
+        title="Entrar no sistema"
+        description="Acesse o painel de voluntarios ou o portal do beneficiario com suas credenciais."
+      />
 
-      <section className="py-8 max-w-3xl mx-auto px-4">
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-          {/* Coluna esquerda: formulário */}
-          <div>
+      <Section tone="white">
+        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+          <Card className="p-6 lg:p-8">
             {erro && (
-              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-                ❌ {erro}
+              <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {erro}
               </div>
             )}
-
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="space-y-4 bg-white p-8 rounded-lg shadow-md border border-gray-100"
-            >
-              <h3 className="font-bold text-gray-800 text-lg mb-2">Entrar</h3>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-1 text-sm">Usuário</label>
-                <input
-                  {...register('usuario', { required: 'Digite seu usuário' })}
-                  className={`w-full px-3 py-2 border rounded-lg text-sm ${errors.usuario ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
-                  placeholder="Ex: ana.souza ou CA-2024-001"
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <h2 className="text-2xl font-bold text-[#0F172A]">Credenciais</h2>
+              <Field label="Usuario" error={errors.usuario?.message}>
+                <Input
+                  {...register('usuario', { required: 'Digite seu usuario' })}
+                  placeholder="ana.souza ou CA-2024-001"
                   autoComplete="username"
                 />
-                {errors.usuario && <p className="text-red-500 text-xs mt-1">{errors.usuario.message}</p>}
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-1 text-sm">Senha</label>
-                <input
+              </Field>
+              <Field label="Senha" error={errors.senha?.message}>
+                <Input
                   type="password"
                   {...register('senha', { required: 'Digite sua senha' })}
-                  className={`w-full px-3 py-2 border rounded-lg text-sm ${errors.senha ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
-                  placeholder="••••••••"
+                  placeholder="Digite sua senha"
                   autoComplete="current-password"
                 />
-                {errors.senha && <p className="text-red-500 text-xs mt-1">{errors.senha.message}</p>}
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              >
+              </Field>
+              <Button type="submit" disabled={loading} size="large" fullWidth>
                 {loading ? 'Entrando...' : 'Entrar'}
-              </button>
+              </Button>
             </form>
+          </Card>
 
-            {/* Perfis */}
-            <div className="mt-4 grid grid-cols-2 gap-3 text-center text-xs text-gray-500">
-              <div className="bg-white rounded-lg border border-gray-100 p-3 shadow-sm">
-                <div className="text-xl mb-1">🙋</div>
-                <div className="font-semibold text-gray-700">Voluntário</div>
-                <div>Painel de administração</div>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-100 p-3 shadow-sm">
-                <div className="text-xl mb-1">💙</div>
-                <div className="font-semibold text-gray-700">Beneficiário</div>
-                <div>Portal de atendimento</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Coluna direita: acessos rápidos */}
-          <div className="space-y-4">
-
-            {/* Voluntários */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-5">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
-                Voluntários — acesso ao painel
-              </p>
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-1">
+            <Card className="p-5">
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#2563EB]">Voluntarios</p>
               <div className="space-y-2">
-                {voluntarios.map(v => (
+                {voluntarios.map((item) => (
                   <button
-                    key={v.usuario}
+                    key={item.usuario}
                     type="button"
-                    onClick={() => preencher(v.usuario, v.senha)}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                    onClick={() => preencher(item.usuario, item.senha)}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-left transition hover:border-blue-200 hover:bg-blue-50"
                   >
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">{v.nome}</p>
-                      <p className="text-xs text-gray-500">{v.area}{v.sigilo ? ' · 🔒 Sigilo' : ''}</p>
-                    </div>
-                    <span className="text-xs text-blue-500 font-medium shrink-0 ml-2">usar →</span>
+                    <span>
+                      <span className="block text-sm font-bold text-[#0F172A]">{item.nome}</span>
+                      <span className="text-xs text-[#475569]">{item.area}{item.sigilo ? ' | Sigilo' : ''}</span>
+                    </span>
+                    <span className="text-xs font-bold text-[#2563EB]">usar</span>
                   </button>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            {/* Beneficiários */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-5">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
-                Beneficiários — acesso ao portal
-              </p>
+            <Card className="p-5">
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#2563EB]">Beneficiarios</p>
               <div className="space-y-2">
-                {beneficiarios.map(b => (
+                {beneficiarios.map((item) => (
                   <button
-                    key={b.usuario}
+                    key={item.usuario}
                     type="button"
-                    onClick={() => preencher(b.usuario, b.senha)}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                    onClick={() => preencher(item.usuario, item.senha)}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-left transition hover:border-blue-200 hover:bg-blue-50"
                   >
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">{b.nome}</p>
-                      <p className="text-xs text-gray-500">{b.desc}</p>
-                    </div>
-                    <span className="text-xs text-blue-500 font-medium shrink-0 ml-2">usar →</span>
+                    <span>
+                      <span className="block text-sm font-bold text-[#0F172A]">{item.nome}</span>
+                      <span className="text-xs text-[#475569]">{item.desc}</span>
+                    </span>
+                    <span className="text-xs font-bold text-[#2563EB]">usar</span>
                   </button>
                 ))}
               </div>
-            </div>
-
+            </Card>
           </div>
         </div>
-      </section>
-    </div>
+      </Section>
+    </PageShell>
   );
 }
 
 export default Login;
+

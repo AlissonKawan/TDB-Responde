@@ -1,240 +1,142 @@
-// src/pages/Sobre.tsx
-import Button from "../components/ui/Button";
+import Section from '../components/layout/Section';
+import PageShell from '../components/layout/PageShell';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageHeader from '../components/ui/PageHeader';
+import SectionHeader from '../components/ui/SectionHeader';
+
+const technologies = [
+  'React', 'Vite', 'TypeScript', 'TailwindCSS', 'React Router', 'React Hook Form', 'Fetch API', 'Quarkus',
+];
+
+const challenges = [
+  ['Canais desconectados', 'WhatsApp, e-mail e redes sociais sem integracao geravam perda de mensagens e respostas duplicadas.'],
+  ['Historico fragmentado', 'Voluntarios tinham dificuldade para acompanhar o contexto de cada atendimento.'],
+  ['Prioridade pouco clara', 'Casos urgentes precisavam de uma triagem mais visual e objetiva.'],
+  ['Captacao manual', 'Novos voluntarios precisavam de um fluxo simples para demonstrar interesse.'],
+];
+
+const solutions = [
+  ['Atendimento centralizado', 'Todos os canais aparecem em uma unica operacao visual.'],
+  ['Protocolo de sigilo', 'Casos sensiveis podem ser tratados com mais cuidado e controle.'],
+  ['Painel operacional', 'Status, prioridades e responsaveis ficam visiveis para a equipe.'],
+  ['Triagem por prioridade', 'Demandas sao classificadas para orientar a proxima resposta.'],
+  ['Historico unificado', 'Mensagens e mudancas de status ficam registradas no fluxo.'],
+  ['Captacao de voluntarios', 'Formulario publico registra candidatos para analise interna.'],
+];
+
+const flow = [
+  ['1', 'Entrada do beneficiario', 'A demanda chega por canais como WhatsApp, e-mail, redes sociais ou atendimento presencial.'],
+  ['2', 'Triagem inicial', 'A equipe registra dados, classifica prioridade e protege informacoes sensiveis.'],
+  ['3', 'Atribuicao', 'O caso e direcionado ao voluntario adequado conforme disponibilidade e especialidade.'],
+  ['4', 'Acompanhamento', 'Mensagens, status e historico permanecem em um fluxo unico.'],
+  ['5', 'Encerramento', 'O atendimento e finalizado com contexto preservado para consultas futuras.'],
+];
 
 function Sobre() {
-  const technologies = [
-    'HTML5', 'Tailwind CSS', 'JavaScript', 'TypeScript',
-    'React', 'Vite', 'React Hook Form', 'React Router DOM',
-    'Git & GitHub', 'localStorage API',
-  ];
-
-  const futureFeatures = [
-    'Integração direta com WhatsApp Business',
-    'Integração com e-mail corporativo',
-    'Dashboard de análises e relatórios',
-    'Filtros avançados de busca',
-    'Aplicativo mobile (Android e iOS)',
-    'Notificações push em tempo real',
-  ];
-
-  const problemas = [
-    {
-      icon: '📱',
-      title: 'Múltiplos canais desconectados',
-      desc: 'WhatsApp, e-mail e redes sociais sem integração, gerando perda de mensagens e respostas duplicadas.',
-    },
-    {
-      icon: '🔍',
-      title: 'Sem histórico centralizado',
-      desc: 'Voluntários não conseguiam acompanhar o histórico de cada beneficiário entre os atendimentos.',
-    },
-    {
-      icon: '⏱️',
-      title: 'Tempo de resposta alto',
-      desc: 'A falta de triagem e priorização deixava casos urgentes sem atendimento imediato.',
-    },
-    {
-      icon: '👥',
-      title: 'Dificuldade de captação',
-      desc: 'Novos voluntários não tinham um canal simples para se inscrever e começar a ajudar.',
-    },
-  ];
-
-  const solucoes = [
-    {
-      icon: '⚡',
-      title: 'Atendimento centralizado',
-      desc: 'Todos os canais em um único painel. Voluntários veem tudo em um só lugar.',
-    },
-    {
-      icon: '🔒',
-      title: 'Protocolo de sigilo',
-      desc: 'Casos sensíveis de Mulher Apolônia com acesso restrito, codinomes e controle de sigilo absoluto.',
-    },
-    {
-      icon: '📊',
-      title: 'Dashboard em tempo real',
-      desc: 'Métricas de atendimentos, urgências em destaque e visão geral por canal e tipo de pessoa.',
-    },
-    {
-      icon: '🎯',
-      title: 'Triagem por prioridade',
-      desc: 'Atendimentos classificados por prioridade (baixa, média, alta) com alertas visuais para casos urgentes.',
-    },
-    {
-      icon: '💬',
-      title: 'Chat integrado',
-      desc: 'Comunicação direta entre voluntário e beneficiário dentro do próprio sistema, com histórico salvo.',
-    },
-    {
-      icon: '📋',
-      title: 'Captação de voluntários',
-      desc: 'Formulário público de inscrição com aprovação pelo admin, criando o acesso automaticamente.',
-    },
-  ];
-
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-blue-50 py-12 text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-5xl font-bold text-gray-800 mb-2">
-            Conheça o <span className="text-blue-600">TDB Responde</span>
-          </h2>
-          <p className="text-gray-600 text-2xl">
-            Um sistema de atendimento centralizado desenvolvido para a{' '}
-            <strong>Turma do Bem</strong>
-          </p>
-        </div>
-      </section>
+    <PageShell>
+      <PageHeader
+        eyebrow="Sobre o projeto"
+        title="Uma plataforma para organizar atendimento social"
+        description="O TDB Responde e um MVP desenvolvido para centralizar comunicacao, priorizar demandas e apoiar voluntarios da Turma do Bem com uma experiencia digital mais clara."
+      />
 
-      {/* O que é */}
-      <section className="py-16 max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-md border border-gray-100 p-8">
-          <h3 className="text-2xl font-bold mb-4 text-gray-800">O que é o TDB Responde?</h3>
-          <p className="text-gray-600 leading-relaxed text-lg mb-4">
-            O <strong>TDB Responde</strong> é um MVP (Produto Mínimo Viável) desenvolvido como projeto
-            acadêmico pela FIAP em parceria com a ONG <strong>Turma do Bem</strong>. O sistema unifica
-            e organiza todos os atendimentos da ONG em uma única plataforma digital, facilitando a
-            comunicação entre voluntários e beneficiários.
-          </p>
-          <p className="text-gray-600 leading-relaxed text-lg">
-            A plataforma atende dois públicos distintos: <strong>crianças e adolescentes</strong> que
-            recebem atendimento odontológico gratuito, e mulheres em situação de vulnerabilidade
-            cadastradas no <strong>Programa Apolônia</strong>, com protocolo especial de sigilo e proteção.
-          </p>
-        </div>
-      </section>
-
-      {/* Os problemas */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-4 text-gray-800">Os desafios da ONG</h3>
-          <p className="text-center text-gray-600 mb-10 text-lg">
-            O que motivou a criação do sistema
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {problemas.map((p) => (
-              <article
-                key={p.title}
-                className="p-6 rounded-lg shadow-md text-center border bg-white border-gray-100 transition-transform duration-300 hover:scale-105"
-              >
-                <div className="text-4xl mb-4">{p.icon}</div>
-                <h4 className="text-lg font-bold mb-2 text-gray-800">{p.title}</h4>
-                <p className="text-gray-600 text-sm">{p.desc}</p>
-              </article>
-            ))}
+      <Section tone="white">
+        <Card className="p-8">
+          <SectionHeader title="O que e o TDB Responde?" />
+          <div className="grid gap-6 text-lg leading-8 text-[#475569] lg:grid-cols-2">
+            <p>
+              O sistema unifica atendimentos da ONG em uma plataforma digital, facilitando a comunicacao entre voluntarios e beneficiarios.
+            </p>
+            <p>
+              A solucao atende criancas, adolescentes e mulheres em situacao de vulnerabilidade, preservando contexto, prioridade e sigilo quando necessario.
+            </p>
           </div>
-        </div>
-      </section>
+        </Card>
+      </Section>
 
-      {/* As soluções */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-4 text-gray-800">Como o TDB Responde resolve</h3>
-          <p className="text-center text-gray-600 mb-10 text-lg">
-            Funcionalidades desenvolvidas para cada problema identificado
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {solucoes.map((s, i) => (
-              <article
-                key={s.title}
-                className={`p-6 rounded-lg shadow-md border transition-transform duration-300 hover:scale-105 ${
-                  i === 0 ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-100' : 'bg-white border-gray-100'
-                }`}
-              >
-                <div className="text-3xl mb-3">{s.icon}</div>
-                <h4 className="text-lg font-bold mb-2 text-gray-800">{s.title}</h4>
-                <p className="text-gray-600 text-sm">{s.desc}</p>
-                {i === 0 && (
-                  <span className="inline-block mt-3 text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                    Principal
-                  </span>
-                )}
-              </article>
-            ))}
-          </div>
+      <Section tone="blue">
+        <SectionHeader
+          eyebrow="Desafios"
+          title="O problema que orientou o produto"
+          description="A proposta nasce da necessidade de reduzir dispersao operacional e dar mais clareza ao atendimento."
+        />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {challenges.map(([title, desc], index) => (
+            <Card key={title} className="p-6">
+              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 font-bold text-[#2563EB] ring-1 ring-blue-100">
+                {index + 1}
+              </span>
+              <h3 className="text-lg font-bold text-[#0F172A]">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-[#475569]">{desc}</p>
+            </Card>
+          ))}
         </div>
-      </section>
+      </Section>
 
-      {/* Como funciona o fluxo */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-10 text-gray-800">Como funciona</h3>
-          <div className="space-y-4">
-            {[
-              { step: '1', title: 'Beneficiário entra em contato', desc: 'Via WhatsApp, e-mail, Instagram ou presencialmente. A demanda chega ao sistema.' },
-              { step: '2', title: 'Triagem e abertura do atendimento', desc: 'O voluntário abre um atendimento, classifica a prioridade e registra os dados do beneficiário com segurança.' },
-              { step: '3', title: 'Atribuição ao voluntário responsável', desc: 'O atendimento é atribuído ao voluntário com a especialidade adequada (odontologia, psicologia, direito etc.).' },
-              { step: '4', title: 'Acompanhamento e comunicação', desc: 'Voluntário e beneficiário se comunicam pelo chat integrado. O status é atualizado em tempo real.' },
-              { step: '5', title: 'Encerramento e histórico', desc: 'Ao finalizar, o atendimento é encerrado. Todo o histórico fica registrado no sistema para consulta futura.' },
-            ].map((item) => (
-              <div key={item.step} className="flex gap-4 bg-white rounded-lg border border-gray-100 p-5 shadow-sm">
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold text-lg flex items-center justify-center shrink-0">
-                  {item.step}
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-800 mb-1">{item.title}</h4>
-                  <p className="text-gray-600 text-sm">{item.desc}</p>
-                </div>
+      <Section tone="white">
+        <SectionHeader
+          eyebrow="Solucao"
+          title="Como o TDB Responde resolve"
+          description="Funcionalidades pensadas para transformar mensagens dispersas em uma operacao acompanhavel."
+        />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {solutions.map(([title, desc], index) => (
+            <Card key={title} className="p-6 transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-950/10">
+              <Badge tone={index === 0 ? 'info' : 'neutral'}>{index === 0 ? 'Principal' : 'Modulo'}</Badge>
+              <h3 className="mt-4 text-lg font-bold text-[#0F172A]">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-[#475569]">{desc}</p>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      <Section tone="blue">
+        <SectionHeader title="Como funciona" align="center" />
+        <div className="mx-auto max-w-4xl space-y-4">
+          {flow.map(([step, title, desc]) => (
+            <Card key={step} className="flex gap-4 p-5">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] text-lg font-black text-white shadow-lg shadow-blue-600/20">
+                {step}
+              </span>
+              <div>
+                <h3 className="font-bold text-[#0F172A]">{title}</h3>
+                <p className="mt-1 text-sm leading-6 text-[#475569]">{desc}</p>
               </div>
-            ))}
-          </div>
+            </Card>
+          ))}
         </div>
-      </section>
+      </Section>
 
-      {/* Tecnologias */}
-      <section className="py-16 max-w-4xl mx-auto px-4">
-        <h3 className="text-3xl font-bold text-center mb-10 text-gray-800">Tecnologias utilizadas</h3>
-        <div className="flex flex-wrap gap-3 justify-center">
+      <Section tone="white">
+        <SectionHeader title="Tecnologias utilizadas" align="center" />
+        <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-3">
           {technologies.map((tech) => (
-            <span
-              key={tech}
-              className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-medium transition-transform duration-300 hover:scale-125"
-            >
+            <span key={tech} className="rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-[#2563EB]">
               {tech}
             </span>
           ))}
         </div>
-      </section>
+      </Section>
 
-      {/* Roadmap Futuro */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-4 text-gray-800">Roadmap futuro</h3>
-          <p className="text-center text-gray-600 mb-10">
-            Nosso objetivo é evoluir o MVP para um sistema completo de atendimento digital
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {futureFeatures.map((feature) => (
-              <div key={feature} className="flex items-center gap-3 bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
-                <span className="text-gray-700">{feature}</span>
-              </div>
-            ))}
+      <Section tone="base">
+        <Card className="flex flex-col gap-6 p-8 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#2563EB]">Colaborar</p>
+            <h2 className="mt-2 text-3xl font-bold text-[#0F172A]">Quer saber mais sobre o projeto?</h2>
+            <p className="mt-2 text-[#475569]">Fale com a equipe ou conheca os integrantes.</p>
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 max-w-4xl mx-auto px-4">
-        <article className="text-center bg-blue-50 p-8 rounded-lg">
-          <h3 className="text-2xl font-bold mb-4 text-gray-800">Quer saber mais ou colaborar?</h3>
-          <p className="text-gray-600 mb-6">
-            Entre em contato com a equipe ou conheça os criadores do projeto.
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button href="/contato" variant="primary" size="large">
-              Fale Conosco
-            </Button>
-            <Button href="/integrantes" variant="secondary" size="large">
-              Ver a Equipe
-            </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button href="/contato" size="large">Fale conosco</Button>
+            <Button href="/integrantes" variant="secondary" size="large">Ver equipe</Button>
           </div>
-        </article>
-      </section>
-    </div>
+        </Card>
+      </Section>
+    </PageShell>
   );
 }
 
 export default Sobre;
+

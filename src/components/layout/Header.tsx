@@ -1,39 +1,31 @@
 import { Link } from 'react-router-dom';
+import Container from '../ui/Container';
 
 function Header() {
   return (
-    <header className="bg-blue-600 text-white p-4">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
-        
-        {/* Logo TDB Responde + Texto esquerda - CLICÁVEL */}
-        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity transition-transform duration-300 hover:scale-125">
-          <img 
-            src="/img/LogoTDB.png" 
-            alt="Logo TDB" 
-            className="h-20 w-auto"
+    <header className="border-b border-[#E2E8F0]/80 bg-white/90 backdrop-blur-xl">
+      <Container className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <Link to="/" className="flex items-center gap-4">
+          <img
+            src="/img/tdb-responde-logo.svg"
+            alt="TDB Responde"
+            className="h-16 w-auto lg:h-20"
           />
-          <div>
-            <h1 className="text-3xl font-bold leading-none">TDB Responde</h1>
-            <p className="text-lg mt-1">Mais agilidade, mais acolhimento</p>
-          </div>
+          <p className="hidden max-w-44 text-sm font-medium leading-5 text-[#475569] md:block">
+            Atendimento social com inteligencia operacional
+          </p>
         </Link>
 
-        {/* Logo Turma do Bem direita */}
-        <a 
-          href="https://turmadobem.org.br/" 
-          target="_blank" 
+        <a
+          href="https://turmadobem.org.br/"
+          target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity transition-transform duration-300 hover:scale-125"
+          className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-semibold text-[#475569] shadow-sm transition hover:border-blue-200 hover:text-[#2563EB]"
         >
-          <span className="text-xl">Em colaboração com:</span>
-          <img 
-            src="/img/turmadobem.png" 
-            alt="Turma do Bem" 
-            className="h-12 w-auto mb-4 transition-transform duration-300 hover:scale-125"
-          />
+          <span>Em colaboracao com</span>
+          <img src="/img/turmadobem.png" alt="Turma do Bem" className="h-10 w-auto lg:h-11" />
         </a>
-
-      </div>
+      </Container>
     </header>
   );
 }

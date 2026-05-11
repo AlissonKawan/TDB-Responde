@@ -1,6 +1,14 @@
-// src/pages/PortalBeneficiario.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Section from '../components/layout/Section';
+import PageShell from '../components/layout/PageShell';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Container from '../components/ui/Container';
+import { Input } from '../components/ui/Input';
+import PageHeader from '../components/ui/PageHeader';
+import SectionHeader from '../components/ui/SectionHeader';
 import { useAuth } from '../context/useAuth';
 import { loadTDBState, saveTDBState } from '../context/tdbStorage';
 import type { Atendimento, CriancaAdolescente, MulherApolonia } from '../types';
@@ -11,14 +19,11 @@ function nomePessoa(a: Atendimento) {
     : (a.pessoa as MulherApolonia).codinome;
 }
 
-function badgeStatus(s: string) {
-  const map: Record<string, string> = {
-    'Aberto':        'bg-blue-100 text-blue-800',
-    'Em andamento':  'bg-yellow-100 text-yellow-800',
-    'Aguardando':    'bg-purple-100 text-purple-800',
-    'Encerrado':     'bg-green-100 text-green-700',
-  };
-  return map[s] ?? 'bg-gray-100 text-gray-700';
+function statusTone(status: string) {
+  if (status === 'Encerrado') return 'success';
+  if (status === 'Aberto') return 'info';
+  if (status === 'Em andamento') return 'warning';
+  return 'neutral';
 }
 
 function PortalBeneficiario() {
@@ -28,14 +33,13 @@ function PortalBeneficiario() {
   const [chatInput, setChatInput] = useState('');
   const [atendAberto, setAtendAberto] = useState<Atendimento | null>(null);
 
-  // Filtra pelo código/codinome que bate com o login
   const meuNome = user?.nome?.toUpperCase() ?? '';
-  const meusAtendimentos = state.atendimentos.filter(a => {
+  const meusAtendimentos = state.atendimentos.filter((a) => {
     const nome = nomePessoa(a).toUpperCase();
     return nome === meuNome || nome.includes(meuNome) || meuNome.includes(nome);
   });
-  const ativos    = meusAtendimentos.filter(a => a.status !== 'Encerrado');
-  const encerrados = meusAtendimentos.filter(a => a.status === 'Encerrado');
+  const ativos = meusAtendimentos.filter((a) => a.status !== 'Encerrado');
+  const encerrados = meusAtendimentos.filter((a) => a.status === 'Encerrado');
 
   const sendMsg = () => {
     if (!chatInput.trim() || !atendAberto) return;
@@ -46,7 +50,7 @@ function PortalBeneficiario() {
     };
     const newState = {
       ...state,
-      atendimentos: state.atendimentos.map(a => a.id === atendAberto.id ? updatedAtend : a),
+      atendimentos: state.atendimentos.map((a) => a.id === atendAberto.id ? updatedAtend : a),
     };
     setState(newState);
     saveTDBState(newState);
@@ -55,219 +59,121 @@ function PortalBeneficiario() {
   };
 
   return (
-    <div>
-      {/* Header — mesmo padrão da NavBar do projeto */}
-      <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/')}
-            className="text-blue-200 hover:text-white text-sm transition-colors"
-          >
-            ← Página principal
-          </button>
-          <span className="text-blue-400">|</span>
-          <span className="text-sm font-semibold">Portal do Beneficiário</span>
-          <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">{user?.nome}</span>
-        </div>
-        <button
-          onClick={() => { logout(); navigate('/login'); }}
-          className="text-xs text-blue-200 hover:text-white transition-colors"
-        >
-          Sair →
-        </button>
-      </div>
+    <PageShell>
+      <header className="border-b border-[#E2E8F0] bg-white/90 backdrop-blur-xl">
+        <Container className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <button onClick={() => navigate('/')} className="text-sm font-semibold text-[#2563EB] hover:text-[#1E3A8A]">
+              Voltar para o site
+            </button>
+            <p className="mt-1 text-sm text-[#475569]">Portal do beneficiario | {user?.nome}</p>
+          </div>
+          <Button variant="secondary" onClick={() => { logout(); navigate('/login'); }}>Sair</Button>
+        </Container>
+      </header>
 
-      {/* Hero — mesmo padrão das páginas institucionais */}
-      <section className="bg-blue-50 py-9 text-center">
-        <h2 className="text-4xl font-bold text-gray-800">
-          Olá, <span className="text-blue-600">{user?.nome}</span>! 👋
-        </h2>
-        <p className="text-gray-600 mt-2 text-xl">
-          Acompanhe seus atendimentos e converse com nossos voluntários
-        </p>
-      </section>
+      <PageHeader
+        eyebrow="Portal"
+        title={`Ola, ${user?.nome ?? 'beneficiario'}`}
+        description="Acompanhe seus atendimentos, status e mensagens com a equipe de voluntarios."
+      />
 
-      <div className="max-w-4xl mx-auto px-4 py-10 space-y-10">
-
-        {/* Atendimentos ativos */}
-        <section>
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">Seus atendimentos</h3>
-
-          {ativos.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-10 text-center">
-              <div className="text-4xl mb-3">📭</div>
-              <p className="text-gray-500 font-medium">Nenhum atendimento ativo no momento.</p>
-              <p className="text-gray-400 text-sm mt-1">
-                Seu código de acesso é <strong>{user?.nome}</strong>. Ele deve corresponder ao código do seu atendimento.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {ativos.map(a => {
-                const vol = a.voluntarioId ? state.voluntarios.find(v => v.id === a.voluntarioId) : null;
-                const ultimaMsg = a.mensagens[a.mensagens.length - 1];
-                return (
-                  <div
-                    key={a.id}
-                    onClick={() => setAtendAberto(a)}
-                    className="bg-white rounded-lg shadow-md border border-gray-100 p-6 cursor-pointer hover:border-blue-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-bold text-gray-800">{nomePessoa(a)}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeStatus(a.status)}`}>
-                            {a.status}
-                          </span>
-                          {a.prioridade === 3 && (
-                            <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700">
-                              Urgente
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500 mb-2">
-                          Canal: <strong>{a.canal}</strong> · Aberto em {a.dataAbertura}
-                        </p>
-                        {ultimaMsg && (
-                          <p className="text-sm text-gray-400 truncate">
-                            💬 {ultimaMsg.de === 'voluntario' ? `${vol?.nome ?? 'Voluntário'}: ` : 'Você: '}
-                            {ultimaMsg.texto}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-center shrink-0">
-                        {vol ? (
-                          <>
-                            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold text-sm flex items-center justify-center mx-auto mb-1 transition-transform duration-300 hover:scale-110">
-                              {vol.nome.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}
-                            </div>
-                            <p className="text-xs text-gray-500">{vol.nome.split(' ')[0]}</p>
-                            <p className="text-[10px] text-gray-400">{vol.especialidade}</p>
-                          </>
-                        ) : (
-                          <p className="text-xs text-gray-400 text-center">Aguardando<br />voluntário</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* Encerrados */}
-        {encerrados.length > 0 && (
-          <section>
-            <h3 className="text-xl font-bold text-gray-600 mb-4">Atendimentos encerrados</h3>
-            <div className="space-y-3">
-              {encerrados.map(a => (
-                <div
+      <Section tone="white">
+        <SectionHeader title="Seus atendimentos" description="Protocolos ativos aparecem primeiro para facilitar o acompanhamento." />
+        {ativos.length === 0 ? (
+          <Card className="p-10 text-center">
+            <p className="text-lg font-bold text-[#0F172A]">Nenhum atendimento ativo no momento.</p>
+            <p className="mt-2 text-[#475569]">Seu codigo de acesso e {user?.nome}. Ele deve corresponder ao codigo do atendimento.</p>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {ativos.map((a) => {
+              const vol = a.voluntarioId ? state.voluntarios.find((v) => v.id === a.voluntarioId) : null;
+              const ultimaMsg = a.mensagens[a.mensagens.length - 1];
+              return (
+                <Card
                   key={a.id}
-                  className="bg-white rounded-lg border border-gray-100 p-4 flex items-center justify-between shadow-sm"
+                  onClick={() => setAtendAberto(a)}
+                  className="cursor-pointer p-6 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-950/10"
                 >
-                  <div>
-                    <span className="font-medium text-gray-600 text-sm">{nomePessoa(a)}</span>
-                    <p className="text-xs text-gray-400 mt-0.5">Aberto em {a.dataAbertura} · Canal: {a.canal}</p>
-                  </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
-                    Encerrado
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Info de contato — mesmo padrão de seção das páginas institucionais */}
-        <section className="bg-gray-50 rounded-lg border border-gray-100 p-8">
-          <h4 className="text-xl font-bold text-gray-800 mb-4">Precisa de mais ajuda?</h4>
-          <p className="text-gray-600 mb-4">
-            Nossa equipe está disponível para te atender diretamente:
-          </p>
-          <div className="space-y-2 text-gray-600 text-sm mb-6">
-            <div>📍 Rua Maurício Francisco Klabin 449, Vila Mariana — São Paulo/SP</div>
-            <div>📞 (11) 5084-7276</div>
-          </div>
-          <button
-            onClick={() => navigate('/contato')}
-            className="inline-block rounded-xl font-semibold transition-colors transition-transform duration-300 hover:scale-105 bg-blue-600 text-white hover:bg-blue-700 px-6 py-3"
-          >
-            Fale com a equipe
-          </button>
-        </section>
-
-      </div>
-
-      {/* Modal de chat */}
-      {atendAberto && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
-            <div className="flex justify-between items-center p-5 border-b border-gray-100">
-              <div>
-                <h3 className="font-bold text-gray-800">Atendimento #{atendAberto.id}</h3>
-                <span className={`text-xs px-2 py-0.5 rounded-full inline-block font-medium mt-1 ${badgeStatus(atendAberto.status)}`}>
-                  {atendAberto.status}
-                </span>
-              </div>
-              <button
-                onClick={() => setAtendAberto(null)}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-              >
-                &times;
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4">
-              {/* Mensagens */}
-              <div className="h-64 overflow-y-auto flex flex-col gap-2 bg-gray-50 rounded-lg p-3 border border-gray-100">
-                {atendAberto.mensagens.map((m, i) => {
-                  const vol = atendAberto.voluntarioId
-                    ? state.voluntarios.find(v => v.id === atendAberto.voluntarioId)
-                    : null;
-                  return (
-                    <div
-                      key={i}
-                      className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${
-                        m.de === 'voluntario'
-                          ? 'bg-blue-600 text-white self-end rounded-br-sm'
-                          : 'bg-white border border-gray-200 self-start rounded-bl-sm'
-                      }`}
-                    >
-                      {m.texto}
-                      <div className={`text-[10px] mt-1 ${m.de === 'voluntario' ? 'text-blue-200' : 'text-gray-400'}`}>
-                        {m.de === 'voluntario' ? (vol?.nome ?? 'Voluntário') : user?.nome} · {m.hora}
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-lg font-bold text-[#0F172A]">#{a.id} {nomePessoa(a)}</h3>
+                        <Badge tone={statusTone(a.status)}>{a.status}</Badge>
+                        {a.prioridade === 3 && <Badge tone="danger">Urgente</Badge>}
                       </div>
+                      <p className="mt-2 text-sm text-[#475569]">Canal: {a.canal} | Aberto em {a.dataAbertura}</p>
+                      {ultimaMsg && <p className="mt-2 truncate text-sm text-slate-400">{ultimaMsg.de === 'voluntario' ? `${vol?.nome ?? 'Voluntario'}: ` : 'Voce: '}{ultimaMsg.texto}</p>}
                     </div>
-                  );
-                })}
-                {atendAberto.mensagens.length === 0 && (
-                  <span className="text-gray-400 text-xs m-auto">Nenhuma mensagem ainda.</span>
-                )}
-              </div>
+                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-sm text-[#475569]">
+                      {vol ? <strong className="text-[#0F172A]">{vol.nome}</strong> : 'Aguardando voluntario'}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </Section>
 
-              {/* Input */}
+      {encerrados.length > 0 && (
+        <Section tone="blue">
+          <SectionHeader title="Atendimentos encerrados" />
+          <div className="grid gap-3">
+            {encerrados.map((a) => (
+              <Card key={a.id} className="flex items-center justify-between gap-4 p-4">
+                <div>
+                  <p className="font-semibold text-[#0F172A]">{nomePessoa(a)}</p>
+                  <p className="text-sm text-[#475569]">Aberto em {a.dataAbertura} | Canal: {a.canal}</p>
+                </div>
+                <Badge tone="success">Encerrado</Badge>
+              </Card>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      <Section tone="white">
+        <Card className="flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-[#0F172A]">Precisa de mais ajuda?</h2>
+            <p className="mt-2 text-[#475569]">Nossa equipe esta disponivel para atendimento direto.</p>
+          </div>
+          <Button onClick={() => navigate('/contato')} size="large">Fale com a equipe</Button>
+        </Card>
+      </Section>
+
+      {atendAberto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+          <Card className="w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#E2E8F0] p-5">
+              <div>
+                <h3 className="font-bold text-[#0F172A]">Atendimento #{atendAberto.id}</h3>
+                <Badge tone={statusTone(atendAberto.status)}>{atendAberto.status}</Badge>
+              </div>
+              <button onClick={() => setAtendAberto(null)} className="text-2xl leading-none text-[#475569] hover:text-[#0F172A]">&times;</button>
+            </div>
+            <div className="space-y-4 p-5">
+              <div className="flex h-64 flex-col gap-2 overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                {atendAberto.mensagens.map((m, i) => (
+                  <div key={i} className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm ${m.de === 'voluntario' ? 'self-end bg-[#2563EB] text-white' : 'self-start border border-[#E2E8F0] bg-white text-[#0F172A]'}`}>
+                    {m.texto}
+                    <div className={`mt-1 text-[10px] ${m.de === 'voluntario' ? 'text-blue-100' : 'text-slate-400'}`}>{m.hora}</div>
+                  </div>
+                ))}
+              </div>
               <div className="flex gap-2">
-                <input
-                  value={chatInput}
-                  onChange={e => setChatInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && sendMsg()}
-                  placeholder="Escreva sua mensagem..."
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                />
-                <button
-                  onClick={sendMsg}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Enviar
-                </button>
+                <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendMsg()} placeholder="Escreva sua mensagem..." />
+                <Button onClick={sendMsg}>Enviar</Button>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
 
 export default PortalBeneficiario;
+

@@ -1,151 +1,169 @@
-interface Phase {
-  title: string;
-  status: 'Concluído' | 'Em andamento' | 'Futuro';
-  items: string[];
-}
+import Section from '../components/layout/Section';
+import PageShell from '../components/layout/PageShell';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import ChartCard from '../components/ui/ChartCard';
+import PageHeader from '../components/ui/PageHeader';
+import SectionHeader from '../components/ui/SectionHeader';
+import StatCard from '../components/ui/StatCard';
+
+const visualImpactMetrics = [
+  {
+    label: 'Publicos prioritarios',
+    value: '2',
+    description: 'Criancas/adolescentes e mulheres em situacao de vulnerabilidade.',
+    tone: 'blue' as const,
+  },
+  {
+    label: 'Canais reunidos',
+    value: '5',
+    description: 'WhatsApp, e-mail, redes sociais, telefone e atendimento presencial.',
+    tone: 'slate' as const,
+  },
+  {
+    label: 'Tempo de triagem',
+    value: '3m',
+    description: 'Meta visual do MVP para transformar mensagem em atendimento.',
+    tone: 'orange' as const,
+  },
+  {
+    label: 'Historico',
+    value: '1',
+    description: 'Um registro centralizado para cada pessoa acompanhada.',
+    tone: 'blue' as const,
+  },
+];
+
+const audiences = [
+  {
+    title: 'Criancas e adolescentes',
+    description:
+      'Ajuda a organizar demandas odontologicas, responsaveis, escola, prioridade e historico do atendimento em um unico fluxo.',
+    details: ['Dor ou urgencia bucal', 'Acompanhamento com responsavel', 'Registro por codigo protegido'],
+  },
+  {
+    title: 'Mulheres do Programa Apolonia',
+    description:
+      'Apoia casos sensiveis com codinome, controle de sigilo e direcionamento para voluntarios autorizados.',
+    details: ['Atendimento com sigilo', 'Priorizacao por risco', 'Historico com acesso controlado'],
+  },
+];
+
+const helpFlow = [
+  ['Entrada', 'A demanda chega por um canal da ONG e deixa de ficar perdida em conversas separadas.'],
+  ['Triagem', 'A equipe classifica tipo, prioridade, canal, contexto e necessidade de sigilo.'],
+  ['Encaminhamento', 'O atendimento e direcionado a um voluntario disponivel e com especialidade adequada.'],
+  ['Acompanhamento', 'Mensagens, status e historico ficam registrados para continuidade do cuidado.'],
+];
 
 function Roadmap() {
-  const phases: Phase[] = [
-    {
-      title: 'Fase 1 - Fundação',
-      status: 'Concluído',
-      items: [
-        'Estrutura base do site',
-        'Páginas institucionais',
-        'Design responsivo',
-        'Navegação entre páginas'
-      ]
-    },
-    {
-      title: 'Fase 2 - MVP',
-      status: 'Concluído',
-      items: [
-        'Sistema de cadastro de atendimentos',
-        'Integração com Telegram',
-        'Histórico básico',
-        'Busca simples'
-      ]
-    },
-    {
-      title: 'Fase 3 - Frameworks',
-      status: 'Concluído',
-      items: [
-        'Utilizar banco de dados',
-        'Notificações em tempo real com o telegram',
-        'Remodelar o site usando REACT, Vite, Tailwind e TypeScript',
-        'Avançar nos modelos de IA'
-      ]
-    },
-    {
-      title: 'Fase 4 - Dashboard',
-      status: 'Em andamento',
-      items: [
-        'Métricas de atendimento',
-        'Relatórios automáticos',
-        'Gráficos de desempenho',
-        'Exportação de dados'
-      ]
-    },
-    {
-      title: 'Fase 5 - Mobile',
-      status: 'Futuro',
-      items: [
-        'Aplicativo Android',
-        'Aplicativo iOS',
-        'Notificações push',
-        'Offline mode'
-      ]
-    }
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Concluído': return 'bg-green-100 text-green-800 border-green-300';
-      case 'Em andamento': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'Futuro': return 'bg-gray-100 text-gray-600 border-gray-300';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  };
-
   return (
-    <div>
-      {/* Principal */}
-      <section className="bg-blue-50 py-12 text-center">
-        <h2 className="text-5xl font-bold text-gray-800 ">Roadmap</h2>
-        <p className="text-gray-600 mt-2 text-2xl">Evolução do projeto <span className="text-blue-600">TDB Responde</span></p>
-      </section>
+    <PageShell>
+      <PageHeader
+        eyebrow="Solucao"
+        title="Como o TDB Responde ajuda na pratica"
+        description="Uma solucao digital para reduzir dispersao, acelerar triagem e preservar contexto em atendimentos sociais sensiveis."
+      />
 
-      {/* Timeline */}
-      <section className="py-12 max-w-4xl mx-auto px-4">
-        <div className="space-y-8">
-          {phases.map((phase, index) => (
-            <div key={index} className="relative">
-              
-              {/* Linha conectora (exceto no último) */}
-              {index !== phases.length - 1 && (
-                <div className="absolute left-8 top-16 w-0.5 h-12 bg-gray-300"></div>
-              )}
-
-              {/* Card da fase */}
-              <div className="flex gap-4">
-                
-                {/* Bolinha indicadora */}
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center shrink-0 border-4 ${
-                  phase.status === 'Concluído' ? 'bg-green-500 border-green-200' :
-                  phase.status === 'Em andamento' ? 'bg-yellow-500 border-yellow-200' :
-                  'bg-gray-300 border-gray-200'
-                }`}>
-                  <span className="text-white font-bold text-xl">{index + 1}</span>
-                </div>
-
-                {/* Conteúdo */}
-                <div className="flex-grow bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{phase.title}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(phase.status)}`}>
-                      {phase.status}
-                    </span>
-                  </div>
-                  
-                  <ul className="space-y-2">
-                    {phase.items.map((item, i) => (
-                      <li key={i} className="flex items-center gap-2 text-gray-600">
-                        <span className={`w-2 h-2 rounded-full ${
-                          phase.status === 'Concluído' ? 'bg-green-500' :
-                          phase.status === 'Em andamento' ? 'bg-yellow-500' :
-                          'bg-gray-400'
-                        }`}></span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-              </div>
+      <Section tone="white">
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div>
+            <SectionHeader
+              eyebrow="Impacto"
+              title="Menos mensagens perdidas, mais continuidade no cuidado"
+              description="O valor da solucao nao esta em criar mais uma tela, mas em transformar canais separados em um fluxo operacional simples, visivel e rastreavel."
+            />
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="info">Triagem centralizada</Badge>
+              <Badge tone="info">Historico unificado</Badge>
+              <Badge tone="warning">Sigilo orientado</Badge>
+              <Badge tone="success">Fluxo ativo</Badge>
             </div>
+          </div>
+          <ChartCard />
+        </div>
+      </Section>
+
+      <Section tone="blue">
+        <SectionHeader
+          eyebrow="Por que ajuda"
+          title="O problema deixa de ser invisivel"
+          description="Quando tudo fica em mensagens soltas, a equipe perde prioridade, contexto e continuidade. O TDB Responde organiza isso em uma operacao unica."
+        />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {visualImpactMetrics.map((metric) => (
+            <StatCard key={metric.label} {...metric} />
           ))}
         </div>
-      </section>
+        <p className="mt-4 text-sm text-[#475569]">
+          Indicadores visuais de demonstracao do MVP. Eles representam o desenho da solucao e nao dados reais da ONG.
+        </p>
+      </Section>
 
-      {/* Legenda */}
-      <section className="pb-12 max-w-4xl mx-auto px-4">
-        <div className="flex justify-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-green-500"></div>
-            <span>Concluído</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-            <span>Em andamento</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-gray-300"></div>
-            <span>Futuro</span>
-          </div>
+      <Section tone="white">
+        <SectionHeader
+          eyebrow="Quem e afetado"
+          title="Dois grupos precisam de resposta rapida e cuidadosa"
+          description="A solucao foi pensada para apoiar publicos com necessidades diferentes, mas com o mesmo desafio: atendimento que precisa de contexto, prioridade e acolhimento."
+        />
+        <div className="grid gap-6 lg:grid-cols-2">
+          {audiences.map((audience) => (
+            <Card key={audience.title} className="p-6">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-lg font-black text-[#2563EB] ring-1 ring-blue-100">
+                {audience.title[0]}
+              </div>
+              <h3 className="text-2xl font-bold text-[#0F172A]">{audience.title}</h3>
+              <p className="mt-3 leading-7 text-[#475569]">{audience.description}</p>
+              <div className="mt-5 grid gap-3">
+                {audience.details.map((detail) => (
+                  <div key={detail} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#475569]">
+                    {detail}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ))}
         </div>
-      </section>
-    </div>
+      </Section>
+
+      <Section tone="blue">
+        <SectionHeader
+          eyebrow="Como funciona"
+          title="Da primeira mensagem ate a resposta acompanhada"
+          description="O fluxo simplifica o trabalho da equipe sem esconder o que importa: prioridade, responsavel, historico e status."
+        />
+        <div className="grid gap-4 lg:grid-cols-4">
+          {helpFlow.map(([title, description], index) => (
+            <Card key={title} className="relative overflow-hidden p-6">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#2563EB] via-[#60A5FA] to-transparent" />
+              <span className="mb-5 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2563EB] text-sm font-black text-white shadow-lg shadow-blue-600/20">
+                {index + 1}
+              </span>
+              <h3 className="text-lg font-bold text-[#0F172A]">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-[#475569]">{description}</p>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      <Section tone="white">
+        <Card className="flex flex-col gap-6 bg-gradient-to-br from-[#1E3A8A] to-[#2563EB] p-8 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-100">Resultado esperado</p>
+            <h2 className="mt-2 text-3xl font-black">Uma operacao mais clara para quem cuida</h2>
+            <p className="mt-3 max-w-2xl text-blue-100">
+              A plataforma nao substitui o acolhimento humano. Ela remove ruido operacional para que a equipe consiga responder melhor.
+            </p>
+          </div>
+          <Button href="/quero-ser-voluntario" variant="secondary" size="large">
+            Quero ser voluntario
+          </Button>
+        </Card>
+      </Section>
+    </PageShell>
   );
 }
 
 export default Roadmap;
+
