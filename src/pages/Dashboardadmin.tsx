@@ -1,8 +1,11 @@
 // src/pages/DashboardAdmin.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { loadTDBState, saveTDBState } from '../context/tdbStorage';
+import { getEspecialidades } from '../services/especialidadesService';
+import { createVoluntario, getVoluntarios } from '../services/voluntariosService';
+import type { EspecialidadeApi, VoluntarioApi } from '../types/api';
 import type {
   TDBState, Atendimento, Voluntario,
   StatusAtendimento, TipoPessoa,
@@ -27,6 +30,32 @@ function badgePrio(p: number) {
 }
 
 function prioLabel(p: number) { return p === 3 ? 'Alta' : p === 2 ? 'Média' : 'Baixa'; }
+
+const especialidadesFallback: EspecialidadeApi[] = [
+  { id: -1, nome: 'Odontologia' },
+  { id: -2, nome: 'Assistência Social' },
+  { id: -3, nome: 'Psicologia' },
+  { id: -4, nome: 'Direito' },
+  { id: -5, nome: 'Geral' },
+];
+
+function nomeEspecialidade(valor?: string | null) {
+  if (!valor) return 'Sem especialidade';
+  const nomeConhecido = especialidadesFallback.find(e => valor.startsWith(e.nome))?.nome;
+  return nomeConhecido ?? valor.replace(/\s+\d+$/, '').trim();
+}
+
+function mapVoluntarioApi(v: VoluntarioApi): Voluntario {
+  return {
+    id: v.id,
+    nome: v.nome,
+    usuario: v.usuario,
+    senha: v.senha ?? '',
+    especialidade: nomeEspecialidade(v.especialidade?.nome),
+    disponivel: v.disponivel,
+    acessoSigilo: v.acessoSigilo,
+  };
+}
 
 function nomePessoa(a: Atendimento) {
   return a.tipo === 'crianca'
@@ -178,12 +207,60 @@ function DashboardAdmin() {
   const [formAtend, setFormAtend] = useState({ canal: 'WhatsApp', prioridade: '2', voluntarioId: '', mensagem: '' });
   const [formSucesso, setFormSucesso] = useState('');
   const [formErro, setFormErro] = useState('');
-  const [volForm, setVolForm] = useState({ nome: '', usuario: '', senha: '', especialidade: 'Odontologia', disponivel: 'true', acessoSigilo: 'false' });
+  const [volForm, setVolForm] = useState({ nome: '', usuario: '', senha: '', especialidadeId: '-1', especialidade: 'Odontologia', disponivel: 'true', acessoSigilo: 'false' });
   const [volSucesso, setVolSucesso] = useState('');
   const [volErro, setVolErro] = useState('');
+  const [volLoading, setVolLoading] = useState(true);
+  const [volErroApi, setVolErroApi] = useState('');
+  const [especialidades, setEspecialidades] = useState<EspecialidadeApi[]>(especialidadesFallback);
 
   const saveState = (s: TDBState) => { setState(s); saveTDBState(s); };
   const updateAtend = (updated: Atendimento) => saveState({ ...state, atendimentos: state.atendimentos.map(a => a.id === updated.id ? updated : a) });
+
+  useEffect(() => {
+    let ativo = true;
+
+    getEspecialidades()
+      .then(especialidadesApi => {
+        if (!ativo || especialidadesApi.length === 0) return;
+        setEspecialidades(especialidadesApi);
+        setVolForm(prev => {
+          const especialidadeAtual = especialidadesApi.find(e => e.nome === prev.especialidade) ?? especialidadesApi[0];
+          return {
+            ...prev,
+            especialidadeId: String(especialidadeAtual.id),
+            especialidade: especialidadeAtual.nome,
+          };
+        });
+      })
+      .catch(() => {
+        if (!ativo) return;
+        setEspecialidades(especialidadesFallback);
+      });
+
+    getVoluntarios()
+      .then(voluntariosApi => {
+        if (!ativo) return;
+        const voluntarios = voluntariosApi.map(mapVoluntarioApi);
+        setState(prev => {
+          const updated = { ...prev, voluntarios };
+          saveTDBState(updated);
+          return updated;
+        });
+        setVolErroApi('');
+      })
+      .catch(() => {
+        if (!ativo) return;
+        setVolErroApi('Não foi possível carregar voluntários da API. Exibindo dados locais.');
+      })
+      .finally(() => {
+        if (ativo) setVolLoading(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   const atendFiltrados = state.atendimentos.filter(a => {
     const passaStatus = filtroStatus === 'todos' || a.status === filtroStatus;
@@ -232,15 +309,30 @@ function DashboardAdmin() {
     setTimeout(() => { setFormSucesso(''); setAba('atendimentos'); setStep(1); setNovoTipo(null); setFormPessoa({}); setFormAtend({ canal: 'WhatsApp', prioridade: '2', voluntarioId: '', mensagem: '' }); }, 1800);
   };
 
-  const submitVol = () => {
+  const submitVol = async () => {
     setVolErro('');
     if (!volForm.nome.trim() || !volForm.usuario.trim() || volForm.senha.length < 6) { setVolErro('Preencha todos os campos. Senha mínimo 6 caracteres.'); return; }
     if (state.voluntarios.find(v => v.usuario === volForm.usuario.trim())) { setVolErro('Usuário já cadastrado.'); return; }
-    const novoVol: Voluntario = { id: Math.max(...state.voluntarios.map(v => v.id), 0) + 1, nome: volForm.nome.trim(), usuario: volForm.usuario.trim(), senha: volForm.senha, especialidade: volForm.especialidade, disponivel: volForm.disponivel === 'true', acessoSigilo: volForm.acessoSigilo === 'true' };
-    saveState({ ...state, voluntarios: [...state.voluntarios, novoVol] });
-    setVolSucesso('✅ Voluntário cadastrado!');
-    setVolForm({ nome: '', usuario: '', senha: '', especialidade: 'Odontologia', disponivel: 'true', acessoSigilo: 'false' });
-    setTimeout(() => setVolSucesso(''), 3000);
+    const especialidadeId = Number(volForm.especialidadeId);
+    const novoVol: Voluntario = { id: Math.max(...state.voluntarios.map(v => v.id), 0) + 1, nome: volForm.nome.trim(), usuario: volForm.usuario.trim(), senha: volForm.senha, especialidade: nomeEspecialidade(volForm.especialidade), disponivel: volForm.disponivel === 'true', acessoSigilo: volForm.acessoSigilo === 'true' };
+    try {
+      const voluntarioApi = await createVoluntario({
+        nome: volForm.nome.trim(),
+        usuario: volForm.usuario.trim(),
+        senha: volForm.senha,
+        disponivel: volForm.disponivel === 'true',
+        acessoSigilo: volForm.acessoSigilo === 'true',
+        ...(especialidadeId > 0 ? { especialidadeId } : {}),
+      });
+      const voluntarioCriado = mapVoluntarioApi(voluntarioApi);
+      saveState({ ...state, voluntarios: [...state.voluntarios, voluntarioCriado] });
+      setVolSucesso('✅ Voluntário cadastrado!');
+      setVolForm({ nome: '', usuario: '', senha: '', especialidadeId: String(especialidades[0]?.id ?? -1), especialidade: especialidades[0]?.nome ?? 'Odontologia', disponivel: 'true', acessoSigilo: 'false' });
+      setTimeout(() => setVolSucesso(''), 3000);
+    } catch {
+      saveState({ ...state, voluntarios: [...state.voluntarios, novoVol] });
+      setVolErro('Não foi possível salvar na API agora. Cadastro mantido localmente.');
+    }
   };
 
   const abas: [Aba, string][] = [
@@ -536,6 +628,8 @@ function DashboardAdmin() {
               <div className="px-6 py-4 border-b border-gray-100">
                 <h3 className="font-bold text-gray-800">Voluntários cadastrados</h3>
               </div>
+              {volLoading && <div className="px-6 py-3 text-sm text-blue-700 bg-blue-50 border-b border-blue-100">Carregando voluntários...</div>}
+              {volErroApi && <div className="px-6 py-3 text-sm text-yellow-800 bg-yellow-50 border-b border-yellow-100">{volErroApi}</div>}
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
                   <tr>
@@ -552,7 +646,7 @@ function DashboardAdmin() {
                     <tr key={v.id} className="border-t border-gray-50 hover:bg-gray-50">
                       <td className="px-5 py-3 font-medium text-gray-800">{v.nome}</td>
                       <td className="px-5 py-3 text-gray-400 text-xs">{v.usuario}</td>
-                      <td className="px-5 py-3"><span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">{v.especialidade}</span></td>
+                      <td className="px-5 py-3"><span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">{nomeEspecialidade(v.especialidade)}</span></td>
                       <td className="px-5 py-3"><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${v.disponivel ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{v.disponivel ? 'Sim' : 'Não'}</span></td>
                       <td className="px-5 py-3">{v.acessoSigilo ? <span className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded-full font-medium">🔒 Sim</span> : <span className="text-gray-400 text-xs">—</span>}</td>
                       <td className="px-5 py-3 font-bold text-gray-800">{state.atendimentos.filter(a => a.voluntarioId === v.id).length}</td>
@@ -571,8 +665,11 @@ function DashboardAdmin() {
                 <div><label className="text-xs font-semibold text-gray-600 block mb-1">Usuário (login)</label><input value={volForm.usuario} onChange={e => setVolForm({ ...volForm, usuario: e.target.value })} placeholder="maria.costa" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" /></div>
                 <div><label className="text-xs font-semibold text-gray-600 block mb-1">Senha</label><input type="password" value={volForm.senha} onChange={e => setVolForm({ ...volForm, senha: e.target.value })} placeholder="Mín. 6 caracteres" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" /></div>
                 <div><label className="text-xs font-semibold text-gray-600 block mb-1">Especialidade</label>
-                  <select value={volForm.especialidade} onChange={e => setVolForm({ ...volForm, especialidade: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
-                    {['Odontologia', 'Assistência Social', 'Psicologia', 'Direito', 'Geral'].map(e => <option key={e}>{e}</option>)}
+                  <select value={volForm.especialidadeId} onChange={e => {
+                    const especialidade = especialidades.find(item => String(item.id) === e.target.value);
+                    setVolForm({ ...volForm, especialidadeId: e.target.value, especialidade: especialidade?.nome ?? '' });
+                  }} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                    {especialidades.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
                   </select>
                 </div>
                 <div><label className="text-xs font-semibold text-gray-600 block mb-1">Disponível?</label><select value={volForm.disponivel} onChange={e => setVolForm({ ...volForm, disponivel: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"><option value="true">Sim</option><option value="false">Não</option></select></div>
