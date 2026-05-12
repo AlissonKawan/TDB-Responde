@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
+import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 
 interface FieldProps {
   label?: string;
@@ -19,14 +19,26 @@ export function Field({ label, error, children }: FieldProps) {
 const baseInput =
   'w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50 disabled:text-slate-400';
 
-export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`${baseInput} ${props.className ?? ''}`} />;
-}
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  ({ className = '', ...props }, ref) => (
+    <input ref={ref} {...props} className={`${baseInput} ${className}`} />
+  ),
+);
 
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${baseInput} ${props.className ?? ''}`} />;
-}
+Input.displayName = 'Input';
 
-export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${baseInput} resize-none ${props.className ?? ''}`} />;
-}
+export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
+  ({ className = '', ...props }, ref) => (
+    <select ref={ref} {...props} className={`${baseInput} ${className}`} />
+  ),
+);
+
+Select.displayName = 'Select';
+
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  ({ className = '', ...props }, ref) => (
+    <textarea ref={ref} {...props} className={`${baseInput} resize-none ${className}`} />
+  ),
+);
+
+Textarea.displayName = 'Textarea';

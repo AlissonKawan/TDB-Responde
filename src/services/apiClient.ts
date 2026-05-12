@@ -15,7 +15,9 @@ export class ApiError extends Error {
 
 function friendlyMessage(status: number, path: string) {
   if (status === 400) return 'Dados invalidos. Confira os campos e tente novamente.';
+  if (status === 401) return 'Credenciais invalidas ou sessao expirada.';
   if (status === 404) return 'Registro nao encontrado.';
+  if (status === 409) return 'Registro em conflito. Verifique os dados enviados.';
   if (status >= 500) return 'Erro interno da API. Tente novamente em instantes.';
   return `Nao foi possivel concluir a chamada ${path}.`;
 }
@@ -74,7 +76,8 @@ export const apiClient = {
     request<T>(path, { ...options, method: 'POST', body }),
   put: <T>(path: string, body?: unknown, options?: ApiRequestOptions) =>
     request<T>(path, { ...options, method: 'PUT', body }),
+  del: <T>(path: string, options?: ApiRequestOptions) =>
+    request<T>(path, { ...options, method: 'DELETE' }),
   delete: <T>(path: string, options?: ApiRequestOptions) =>
     request<T>(path, { ...options, method: 'DELETE' }),
 };
-

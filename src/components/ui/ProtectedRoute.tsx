@@ -4,17 +4,20 @@
 
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
+import type { TipoUsuario } from '../../types/auth';
 
 interface Props {
   children: React.ReactNode;
   requireVoluntario?: boolean;
+  allowedRoles?: TipoUsuario[];
 }
 
-function ProtectedRoute({ children, requireVoluntario = false }: Props) {
-  const { user, isVoluntario } = useAuth();
+function ProtectedRoute({ children, requireVoluntario = false, allowedRoles }: Props) {
+  const { user, isVoluntario, isAdmin } = useAuth();
 
   if (!user) return <Navigate to="/login" replace />;
-  if (requireVoluntario && !isVoluntario) return <Navigate to="/portal" replace />;
+  if (requireVoluntario && !isVoluntario && !isAdmin) return <Navigate to="/portal/beneficiario" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.tipoUsuario)) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
 }

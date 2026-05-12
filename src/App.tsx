@@ -19,6 +19,7 @@ import Login from './pages/Login';
 import DashboardAdmin from './pages/Dashboardadmin';
 import PortalBeneficiario from './pages/Portalbeneficiario ';
 import CadastroVoluntario from './pages/CadastroVoluntario';
+import PortalVoluntario from './pages/PortalVoluntario';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
             <Route path="integrantes" element={<Integrantes />} />
             <Route path="roadmap" element={<Roadmap />} />
             <Route path="login" element={<Login />} />
+            <Route path="cadastro" element={<CadastroVoluntario />} />
             <Route path="quero-ser-voluntario" element={<CadastroVoluntario />} />
           </Route>
 
@@ -56,6 +58,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <PortalBeneficiario />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/portal/beneficiario"
+            element={
+              <ProtectedRoute allowedRoles={['BENEFICIARIO', 'ADMIN']}>
+                <PortalBeneficiario />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/portal/voluntario"
+            element={
+              <ProtectedRoute allowedRoles={['VOLUNTARIO', 'ADMIN']}>
+                <PortalVoluntario />
               </ProtectedRoute>
             }
           />

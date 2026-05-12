@@ -44,7 +44,19 @@ O Quarkus deve liberar CORS para o front local, por exemplo `http://localhost:51
 
 ## Endpoints consumidos
 
-Endpoints identificados a partir dos services existentes do front:
+Autenticacao e portal:
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /atendimentos`
+- `GET /atendimentos/solicitados`
+- `GET /atendimentos/voluntario/{voluntarioId}`
+- `GET /usuarios`
+- `GET /usuarios/{id}`
+- `PUT /usuarios/{id}`
+- `DELETE /usuarios/{id}`
+
+Services administrativos ainda existentes:
 
 - `GET /voluntarios`
 - `GET /voluntarios/{id}`
@@ -64,6 +76,7 @@ Endpoints identificados a partir dos services existentes do front:
 - Solucao
 - Login
 - Portal do Beneficiario
+- Portal do Voluntario
 - Painel do Voluntario
 - Cadastro publico de voluntario
 
@@ -78,8 +91,21 @@ Endpoints identificados a partir dos services existentes do front:
 - O projeto nao usa Axios.
 - A camada HTTP fica em `src/services/apiClient.ts`.
 - A URL base fica em `src/config/api.ts`.
-- Voluntarios usam CRUD real via API.
-- Atendimentos, portal do beneficiario e inscricoes publicas continuam usando `localStorage`, porque nao ha endpoints do back-end neste checkout para essas entidades.
+- Cadastro de conta chama `POST /auth/register`.
+- Login chama `POST /auth/login` e salva apenas o usuario retornado como sessao simples.
+- Portal do voluntario chama `GET /atendimentos/solicitados` e `GET /atendimentos/voluntario/{voluntarioId}`.
+- O botao "Assumir atendimento" esta preparado, mas aguarda o back-end expor um endpoint especifico.
+
+Endpoint recomendado para assumir atendimento:
+
+```http
+PUT /atendimentos/{atendimentoId}/assumir
+Content-Type: application/json
+
+{
+  "voluntarioId": 1
+}
+```
 
 ## Links
 

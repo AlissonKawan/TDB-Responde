@@ -7,64 +7,58 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { Field, Input } from '../components/ui/Input';
 import PageHeader from '../components/ui/PageHeader';
+import { ApiError } from '../services/apiClient';
+import type { LoginRequest } from '../types/auth';
 import { useAuth } from '../context/useAuth';
-
-interface FormData {
-  usuario: string;
-  senha: string;
-}
 
 function Login() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginRequest>();
 
   if (user) {
-    return <Navigate to={user.tipo === 'voluntario' ? '/admin' : '/portal'} replace />;
+    if (user.tipoUsuario === 'VOLUNTARIO') return <Navigate to="/portal/voluntario" replace />;
+    if (user.tipoUsuario === 'BENEFICIARIO') return <Navigate to="/portal/beneficiario" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
-  const onSubmit = (data: FormData) => {
+  const errorMessage = (error: unknown) => {
+    if (error instanceof ApiError) {
+      if (error.status === 404) return 'Conta nao encontrada.';
+      if (error.status === 401) return 'Senha incorreta.';
+      if (error.status === 0) return 'Nao foi possivel conectar ao servidor.';
+      return error.message;
+    }
+    return 'Nao foi possivel entrar. Tente novamente.';
+  };
+
+  const onSubmit = async (data: LoginRequest) => {
     setErro('');
     setLoading(true);
-    window.setTimeout(() => {
-      const resultado = login(data.usuario, data.senha);
+    try {
+      const loggedUser = await login(data);
+      if (loggedUser.tipoUsuario === 'VOLUNTARIO') navigate('/portal/voluntario');
+      else if (loggedUser.tipoUsuario === 'BENEFICIARIO') navigate('/portal/beneficiario');
+      else navigate('/admin');
+    } catch (error) {
+      setErro(errorMessage(error));
+    } finally {
       setLoading(false);
-      if (resultado === 'voluntario') navigate('/admin');
-      else if (resultado === 'beneficiario') navigate('/portal');
-      else setErro('Usuario ou senha invalidos. Tente novamente.');
-    }, 600);
+    }
   };
-
-  const preencher = (usuario: string, senha: string) => {
-    setValue('usuario', usuario);
-    setValue('senha', senha);
-  };
-
-  const voluntarios = [
-    { usuario: 'ana.souza', senha: '123456', nome: 'Ana Souza', area: 'Odontologia', sigilo: true },
-    { usuario: 'carlos.lima', senha: '123456', nome: 'Carlos Lima', area: 'Assistencia Social', sigilo: false },
-    { usuario: 'beatriz.nunes', senha: '123456', nome: 'Beatriz Nunes', area: 'Psicologia', sigilo: true },
-  ];
-
-  const beneficiarios = [
-    { usuario: 'CA-2024-001', senha: '1234', nome: 'Codigo CA-2024-001', desc: 'Crianca | 12 anos | EMEF Liberdade' },
-    { usuario: 'CA-2024-002', senha: '1234', nome: 'Codigo CA-2024-002', desc: 'Crianca | 9 anos | EMEF Jardins' },
-    { usuario: 'VIOLETA-07', senha: '1234', nome: 'VIOLETA-07', desc: 'Mulher Apolonia | Risco alto' },
-    { usuario: 'ROSA-14', senha: '1234', nome: 'ROSA-14', desc: 'Mulher Apolonia | Risco medio' },
-  ];
 
   return (
     <PageShell>
       <PageHeader
         eyebrow="Acesso"
         title="Entrar no sistema"
-        description="Acesse o painel de voluntarios ou o portal do beneficiario com suas credenciais."
+        description="Use seu e-mail e senha cadastrados no back-end para acessar seu portal."
       />
 
       <Section tone="white">
-        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <Card className="p-6 lg:p-8">
             {erro && (
               <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
@@ -73,17 +67,24 @@ function Login() {
             )}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <h2 className="text-2xl font-bold text-[#0F172A]">Credenciais</h2>
-              <Field label="Usuario" error={errors.usuario?.message}>
+              <Field label="E-mail" error={errors.email?.message}>
                 <Input
-                  {...register('usuario', { required: 'Digite seu usuario' })}
-                  placeholder="ana.souza ou CA-2024-001"
-                  autoComplete="username"
+                  type="email"
+                  {...register('email', {
+                    required: 'Digite seu e-mail',
+                    pattern: { value: /^\S+@\S+$/i, message: 'E-mail invalido' },
+                  })}
+                  placeholder="voce@email.com"
+                  autoComplete="email"
                 />
               </Field>
               <Field label="Senha" error={errors.senha?.message}>
                 <Input
                   type="password"
-                  {...register('senha', { required: 'Digite sua senha' })}
+                  {...register('senha', {
+                    required: 'Digite sua senha',
+                    minLength: { value: 6, message: 'Senha minima de 6 caracteres' },
+                  })}
                   placeholder="Digite sua senha"
                   autoComplete="current-password"
                 />
@@ -94,47 +95,16 @@ function Login() {
             </form>
           </Card>
 
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-1">
-            <Card className="p-5">
-              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#2563EB]">Voluntarios</p>
-              <div className="space-y-2">
-                {voluntarios.map((item) => (
-                  <button
-                    key={item.usuario}
-                    type="button"
-                    onClick={() => preencher(item.usuario, item.senha)}
-                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-left transition hover:border-blue-200 hover:bg-blue-50"
-                  >
-                    <span>
-                      <span className="block text-sm font-bold text-[#0F172A]">{item.nome}</span>
-                      <span className="text-xs text-[#475569]">{item.area}{item.sigilo ? ' | Sigilo' : ''}</span>
-                    </span>
-                    <span className="text-xs font-bold text-[#2563EB]">usar</span>
-                  </button>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-5">
-              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#2563EB]">Beneficiarios</p>
-              <div className="space-y-2">
-                {beneficiarios.map((item) => (
-                  <button
-                    key={item.usuario}
-                    type="button"
-                    onClick={() => preencher(item.usuario, item.senha)}
-                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-left transition hover:border-blue-200 hover:bg-blue-50"
-                  >
-                    <span>
-                      <span className="block text-sm font-bold text-[#0F172A]">{item.nome}</span>
-                      <span className="text-xs text-[#475569]">{item.desc}</span>
-                    </span>
-                    <span className="text-xs font-bold text-[#2563EB]">usar</span>
-                  </button>
-                ))}
-              </div>
-            </Card>
-          </div>
+          <Card className="bg-gradient-to-br from-[#1E3A8A] to-[#2563EB] p-8 text-white">
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-100">Conta nova</p>
+            <h2 className="mt-3 text-3xl font-black">Ainda nao tem acesso?</h2>
+            <p className="mt-4 leading-7 text-blue-100">
+              Cadastre sua conta de voluntario para entrar no portal e acompanhar atendimentos solicitados pela API.
+            </p>
+            <Button href="/quero-ser-voluntario" variant="secondary" size="large" className="mt-8">
+              Criar conta de voluntario
+            </Button>
+          </Card>
         </div>
       </Section>
     </PageShell>

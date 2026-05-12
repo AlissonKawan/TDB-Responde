@@ -5,109 +5,84 @@ import Section from '../components/layout/Section';
 import PageShell from '../components/layout/PageShell';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
-import { Field, Input, Select, Textarea } from '../components/ui/Input';
+import { Field, Input, Select } from '../components/ui/Input';
 import PageHeader from '../components/ui/PageHeader';
 import SectionHeader from '../components/ui/SectionHeader';
-import { loadTDBState, saveTDBState } from '../context/tdbStorage';
-import type { SolicitacaoVoluntario } from '../types';
+import { ApiError } from '../services/apiClient';
+import type { TipoUsuario } from '../types/auth';
+import { useAuth } from '../context/useAuth';
 
 interface FormData {
   nome: string;
   email: string;
-  telefone: string;
-  especialidade: string;
-  motivacao: string;
-  disponibilidade: string;
-}
-
-function gerarId(solicitacoes: SolicitacaoVoluntario[]): number {
-  if (solicitacoes.length === 0) return 1;
-  return Math.max(...solicitacoes.map((s) => s.id)) + 1;
-}
-
-function dataHoje(): string {
-  return new Date().toISOString().slice(0, 10);
+  senha: string;
+  confirmarSenha: string;
+  tipoUsuario: TipoUsuario;
 }
 
 function CadastroVoluntario() {
   const navigate = useNavigate();
-  const [enviado, setEnviado] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const { register: registerAccount } = useAuth();
+  const [sucesso, setSucesso] = useState('');
+  const [erro, setErro] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
+    defaultValues: { tipoUsuario: 'VOLUNTARIO' },
+  });
 
-  const onSubmit = (data: FormData) => {
-    const state = loadTDBState();
-    const solicitacoes = state.solicitacoesVoluntario ?? [];
-    const nova: SolicitacaoVoluntario = {
-      id: gerarId(solicitacoes),
-      nome: data.nome,
-      email: data.email,
-      telefone: data.telefone,
-      especialidade: data.especialidade,
-      motivacao: data.motivacao,
-      disponibilidade: data.disponibilidade,
-      status: 'pendente',
-      dataSolicitacao: dataHoje(),
-    };
-    saveTDBState({ ...state, solicitacoesVoluntario: [...solicitacoes, nova] });
-    setEnviado(true);
+  const senha = watch('senha');
+
+  const errorMessage = (error: unknown) => {
+    if (error instanceof ApiError) {
+      if (error.status === 409) return 'Este e-mail ja esta cadastrado.';
+      if (error.status === 400) return error.message || 'Confira os dados do cadastro.';
+      if (error.status === 0) return 'Nao foi possivel conectar ao servidor.';
+      return error.message;
+    }
+    return 'Nao foi possivel criar o cadastro.';
   };
 
-  if (enviado) {
-    return (
-      <PageShell>
-        <PageHeader
-          eyebrow="Inscricao enviada"
-          title="Recebemos sua solicitacao"
-          description="Sua inscricao foi registrada e sera analisada pela equipe."
-          align="center"
-        />
-        <Section tone="white">
-          <Card className="mx-auto max-w-2xl p-8 text-center">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl font-black text-[#059669] ring-1 ring-emerald-100">
-              OK
-            </div>
-            <h2 className="text-2xl font-bold text-[#0F172A]">Obrigado pelo interesse em ajudar</h2>
-            <p className="mt-3 text-[#475569]">
-              Entraremos em contato em breve pelo e-mail informado.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Button type="button" onClick={() => navigate('/')} size="large">Voltar ao inicio</Button>
-              <Button type="button" variant="secondary" onClick={() => navigate('/sobre')} size="large">Conhecer projeto</Button>
-            </div>
-          </Card>
-        </Section>
-      </PageShell>
-    );
-  }
-
-  const areas = ['Odontologia', 'Assistencia Social', 'Psicologia', 'Direito', 'Educacao', 'Tecnologia', 'Geral'];
-  const disponibilidades = ['Manhas', 'Tardes', 'Noites', 'Fins de semana', 'Flexivel'];
+  const onSubmit = async (data: FormData) => {
+    setErro('');
+    setSucesso('');
+    setLoading(true);
+    try {
+      await registerAccount({
+        nome: data.nome,
+        email: data.email,
+        senha: data.senha,
+        tipoUsuario: data.tipoUsuario,
+      });
+      setSucesso('Cadastro criado com sucesso. Agora voce pode entrar usando seu e-mail e senha.');
+      window.setTimeout(() => navigate('/login'), 1800);
+    } catch (error) {
+      setErro(errorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <PageShell>
       <PageHeader
-        eyebrow="Voluntariado"
-        title="Seja voluntario"
-        description="Registre seu interesse para fazer parte da rede de apoio da Turma do Bem."
+        eyebrow="Cadastro"
+        title="Crie sua conta de voluntario"
+        description="O cadastro chama o back-end em /auth/register e nao salva senha no front-end."
       />
 
       <Section tone="white">
         <SectionHeader
-          eyebrow="Areas"
-          title="Onde sua ajuda pode atuar"
-          description="O projeto conecta diferentes especialidades a demandas sociais reais."
+          eyebrow="Voluntariado"
+          title="Uma conta para acessar atendimentos reais"
+          description="Depois do cadastro, use o login para entrar no portal do voluntario e acompanhar atendimentos solicitados."
         />
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-3">
           {[
-            ['Odontologia', 'Atendimento bucal gratuito para criancas e adolescentes.'],
-            ['Assistencia Social', 'Apoio, acolhimento e orientacao para familias atendidas.'],
-            ['Psicologia', 'Suporte emocional e saude mental para beneficiarios.'],
-            ['Direito', 'Orientacao juridica e defesa de direitos.'],
-          ].map(([title, desc], index) => (
+            ['Conta segura', 'Senha enviada apenas para o back-end no cadastro e login.'],
+            ['Portal dedicado', 'Voluntarios visualizam solicitados e seus atendimentos.'],
+            ['API real', 'Sem banco fake no front quando existe endpoint disponivel.'],
+          ].map(([title, desc]) => (
             <Card key={title} className="p-6">
-              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 font-bold text-[#2563EB] ring-1 ring-blue-100">
-                {index + 1}
-              </span>
               <h3 className="font-bold text-[#0F172A]">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-[#475569]">{desc}</p>
             </Card>
@@ -117,57 +92,61 @@ function CadastroVoluntario() {
 
       <Section tone="blue">
         <Card className="mx-auto max-w-3xl p-6 lg:p-8">
-          <SectionHeader title="Preencha sua inscricao" description="Campos obrigatorios ajudam a equipe a avaliar o melhor caminho para contato." />
+          {sucesso && (
+            <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-[#059669]">
+              {sucesso}
+            </div>
+          )}
+          {erro && (
+            <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              {erro}
+            </div>
+          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Field label="Nome completo" error={errors.nome?.message}>
-              <Input {...register('nome', { required: 'Digite seu nome completo' })} placeholder="Maria da Silva" />
+              <Input {...register('nome', { required: 'Nome obrigatorio' })} placeholder="Maria da Silva" />
             </Field>
-            <div className="grid gap-5 md:grid-cols-2">
-              <Field label="E-mail" error={errors.email?.message}>
-                <Input
-                  type="email"
-                  {...register('email', {
-                    required: 'Digite um e-mail valido',
-                    pattern: { value: /^\S+@\S+$/i, message: 'E-mail invalido' },
-                  })}
-                  placeholder="seu@email.com"
-                />
-              </Field>
-              <Field label="Telefone" error={errors.telefone?.message}>
-                <Input {...register('telefone', { required: 'Digite seu telefone' })} placeholder="(11) 9 0000-0000" />
-              </Field>
-            </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              <Field label="Area de atuacao" error={errors.especialidade?.message}>
-                <Select {...register('especialidade', { required: 'Selecione uma area' })}>
-                  <option value="">Selecione...</option>
-                  {areas.map((area) => <option key={area} value={area}>{area}</option>)}
-                </Select>
-              </Field>
-              <Field label="Disponibilidade" error={errors.disponibilidade?.message}>
-                <Select {...register('disponibilidade', { required: 'Selecione sua disponibilidade' })}>
-                  <option value="">Selecione...</option>
-                  {disponibilidades.map((item) => <option key={item} value={item}>{item}</option>)}
-                </Select>
-              </Field>
-            </div>
-            <Field label="Por que quer ser voluntario?" error={errors.motivacao?.message}>
-              <Textarea
-                rows={5}
-                {...register('motivacao', {
-                  required: 'Conte sua motivacao',
-                  minLength: { value: 20, message: 'Minimo 20 caracteres' },
+            <Field label="E-mail" error={errors.email?.message}>
+              <Input
+                type="email"
+                {...register('email', {
+                  required: 'E-mail obrigatorio',
+                  pattern: { value: /^\S+@\S+$/i, message: 'E-mail invalido' },
                 })}
-                placeholder="Conte um pouco sobre sua motivacao..."
+                placeholder="seu@email.com"
               />
             </Field>
-            <Button type="submit" size="large" fullWidth>Enviar inscricao</Button>
-            <p className="text-center text-sm text-[#475569]">
-              Ja e voluntario?{' '}
-              <button type="button" onClick={() => navigate('/login')} className="font-semibold text-[#2563EB] hover:text-[#1E3A8A]">
-                Acesse o sistema
-              </button>
-            </p>
+            <div className="grid gap-5 md:grid-cols-2">
+              <Field label="Senha" error={errors.senha?.message}>
+                <Input
+                  type="password"
+                  {...register('senha', {
+                    required: 'Senha obrigatoria',
+                    minLength: { value: 6, message: 'Senha minima de 6 caracteres' },
+                  })}
+                  placeholder="Minimo 6 caracteres"
+                />
+              </Field>
+              <Field label="Confirmar senha" error={errors.confirmarSenha?.message}>
+                <Input
+                  type="password"
+                  {...register('confirmarSenha', {
+                    required: 'Confirme sua senha',
+                    validate: (value) => value === senha || 'As senhas precisam ser iguais',
+                  })}
+                  placeholder="Repita sua senha"
+                />
+              </Field>
+            </div>
+            <Field label="Tipo de usuario" error={errors.tipoUsuario?.message}>
+              <Select {...register('tipoUsuario', { required: 'Tipo de usuario obrigatorio' })}>
+                <option value="VOLUNTARIO">Voluntario</option>
+                <option value="BENEFICIARIO">Beneficiario</option>
+              </Select>
+            </Field>
+            <Button type="submit" disabled={loading} size="large" fullWidth>
+              {loading ? 'Criando cadastro...' : 'Criar cadastro'}
+            </Button>
           </form>
         </Card>
       </Section>
